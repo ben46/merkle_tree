@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract MerkleTree is ERC721 {
     bytes32 immutable public root; // Merkle树的根
     mapping(address => bool) public mintedAddress;   // 记录已经mint的地址
+    uint256 private _tokenId;
 
     // 构造函数，初始化NFT合集的名称、代号、Merkle树的根
     constructor(string memory name, string memory symbol, bytes32 merkleroot)
@@ -15,12 +16,13 @@ contract MerkleTree is ERC721 {
     }
 
     // 利用Merkle树验证地址并完成mint
-    function mint(address account, uint256 tokenId, bytes32[] calldata proof)
+    function mint(address account, bytes32[] calldata proof)
     external
     {
         require(_verify(_leaf(account), proof), "Invalid merkle proof"); // Merkle检验通过
         require(!mintedAddress[account], "Already minted!"); // 地址没有mint过
-        _mint(account, tokenId); // mint
+        _tokenId++;
+        _safeMint(account, _tokenId);
         mintedAddress[account] = true; // 记录mint过的地址
     }
 
